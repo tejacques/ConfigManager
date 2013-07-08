@@ -227,13 +227,22 @@
                     .Select(path =>
                     {
                         var fsWatcher = new FileSystemWatcher(
-                            path.FullName, "*.config");
+                            path.FullName, "*.conf");
+
+                        fsWatcher.NotifyFilter =
+                              NotifyFilters.LastWrite
+                            | NotifyFilters.FileName
+                            | NotifyFilters.DirectoryName;
+
+                        fsWatcher.IncludeSubdirectories = true;
 
                         fsWatcher.Changed += fsEventHandler;
                         fsWatcher.Created += fsEventHandler;
                         fsWatcher.Deleted += fsEventHandler;
                         fsWatcher.Error += errorEventHandler;
                         fsWatcher.Renamed += renamedEventHandler;
+
+                        fsWatcher.EnableRaisingEvents = true;
 
                         return fsWatcher;
                     }));
@@ -265,6 +274,12 @@
         public static void RemoveConfig(string key)
         {
             Configuration config;
+
+            key = key.Split('\\', '/').LastOrDefault();
+            if (key.EndsWith(".conf"))
+            {
+                key = key.Replace(".conf","");
+            }
             _configs.TryRemove(key, out config);
 
             if (ConfigKeys.ConfigPathsConfig.ToString() == key)
