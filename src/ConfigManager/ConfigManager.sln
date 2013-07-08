@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1738BA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigManager", "ConfigManager.csproj", "{6DFDDA59-1266-45D7-8B54-332D7B686ACE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigManager.Tests", "..\ConfigManager.Tests\ConfigManager.Tests.csproj", "{61F2083F-81E0-44CF-A529-D65B74E6CC2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{6DFDDA59-1266-45D7-8B54-332D7B686ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DFDDA59-1266-45D7-8B54-332D7B686ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DFDDA59-1266-45D7-8B54-332D7B686ACE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61F2083F-81E0-44CF-A529-D65B74E6CC2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61F2083F-81E0-44CF-A529-D65B74E6CC2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61F2083F-81E0-44CF-A529-D65B74E6CC2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61F2083F-81E0-44CF-A529-D65B74E6CC2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

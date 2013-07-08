@@ -258,6 +258,10 @@
             }
         }
 
+        /// <summary>
+        /// Remove the specified config file from the ConfigManager
+        /// </summary>
+        /// <param name="key">The specified config file key</param>
         public static void RemoveConfig(string key)
         {
             Configuration config;
