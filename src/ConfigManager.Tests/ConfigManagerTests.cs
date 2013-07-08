@@ -18,6 +18,7 @@
         public void SetUp()
         {
         }
+
         [Test]
         public static void TestConfigManager()
         {
