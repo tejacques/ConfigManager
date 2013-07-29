@@ -180,6 +180,9 @@
 
         private static string GetPath(string configPath)
         {
+#if DEBUG
+            string devConfigPath = configPath.Replace(".conf", ".dev.conf");
+#endif
             if (!Path.IsPathRooted(configPath))
             {
                 DirectoryInfo[] paths = GetConfig<ConfigPathsConfig>(
@@ -192,9 +195,18 @@
                         continue;
                     }
 
-                    FileInfo fi = path.EnumerateFiles(
-                        configPath,
-                        SearchOption.AllDirectories).FirstOrDefault();
+                    FileInfo fi = null;
+#if DEBUG
+                    fi = path.EnumerateFiles(
+                            devConfigPath,
+                            SearchOption.AllDirectories).FirstOrDefault();
+#endif
+                    if (null == fi)
+                    {
+                        fi = path.EnumerateFiles(
+                            configPath,
+                            SearchOption.AllDirectories).FirstOrDefault();
+                    }
                     if (fi != null)
                     {
                         configPath = fi.FullName;
@@ -276,10 +288,22 @@
             Configuration config;
 
             key = key.Split('\\', '/').LastOrDefault();
-            if (key.EndsWith(".conf"))
+
+            string conf = ".conf";
+            if (key.EndsWith(conf))
             {
                 key = key.Replace(".conf","");
+                key.Substring(0, key.Length - conf.Length);
             }
+
+#if DEBUG
+            string dev = ".dev";
+            if (key.EndsWith(dev))
+            {
+                key.Substring(0, key.Length - dev.Length);
+            }
+#endif
+
             _configs.TryRemove(key, out config);
 
             if (ConfigKeys.ConfigPathsConfig.ToString() == key)

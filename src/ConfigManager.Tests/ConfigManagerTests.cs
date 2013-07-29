@@ -30,7 +30,7 @@
         public static void TestConfigParse()
         {
             TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
-                ("Test1", "Configs/Test1.conf");
+                ("Test1");
             Assert.NotNull(config);
             Assert.AreEqual(config.Foo, "1");
             Assert.AreEqual(config.Bar, "2");
@@ -43,7 +43,7 @@
             for (int i = 0; i < 10000; i++)
             {
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
-                    ("Test2", "Configs/Test2.conf");
+                    ("Test2");
                 Assert.NotNull(config);
                 Assert.AreEqual(config.Foo, "a");
                 Assert.AreEqual(config.Bar, "b");
@@ -59,7 +59,7 @@
             Parallel.For(0, 100000, options, (x) =>
             {
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
-                    ("Test3", "Configs/Test3.conf");
+                    ("Test3");
                 Assert.NotNull(config);
                 Assert.AreEqual(config.Foo, "!");
                 Assert.AreEqual(config.Bar, "@");
