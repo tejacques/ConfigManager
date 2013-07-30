@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ConfigManger</id>
+    <version>1.0.0</version>
+    <title>ConfigManager</title>
+    <authors>Tom Jacques</authors>
+    <owners>Tom Jacques</owners>
+    <licenseUrl>https://github.com/tejacques/ConfigManager/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/tejacques/ConfigManager</projectUrl>
+    <iconUrl></iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+        Binaries for the ConfigManager library.
+        Visit https://github.com/tejacques/ConfigManager for an overview and usage examples.
+    </description>
+    <summary>
+        An open source helper library for retrieving strongly typed automatically updating configuration data from config files.
+    </summary>
+    <releaseNotes>
+        Version 1.0.0:
+         - File handlers to automatically update config data in the running program
+         - Generic functions to retrieve configuration data as a strongly typed object
+    </releaseNotes>
+    <dependencies>
+        <dependency id="NLog" version="[2.0.0.0, 2.1.0.0)" />
+        <dependency id="ServiceStack.Text" version="[3.3.0, 4.0.0)" />
+    </dependencies>
+    <copyright>Copyright 2013</copyright>
+    <tags>Config Configuration auto updating</tags>
+  </metadata>
+  <files>
+    <file src="..\..\lib\*.*" target="lib\Net40" />
+    <file src="..\..\src\ConfigManager\*.cs" target="src\ConfigManager" />
+  </files>
+</package>
