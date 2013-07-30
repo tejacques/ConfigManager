@@ -411,7 +411,28 @@
         /// </returns>
         public static T ParseConfig<T>(string configRaw) where T : new()
         {
-            T config = JsonSerializer.DeserializeFromString<T>(configRaw);
+            T config = default(T);
+            if (configRaw == null)
+            {
+                ConfigLogger.Log(
+                    LogLevel.Error,
+                    "ConfigManager Error: Cannot deserialize null string for Type {0}",
+                    typeof(T).ToString());
+            }
+            else if (configRaw != string.Empty)
+            {
+                config = JsonSerializer.DeserializeFromString<T>(configRaw);
+
+                if (config == null)
+                {
+                    // Deserializing configraw failed, log configraw
+                    ConfigLogger.Error(
+                        @"ConfigManager Error: Unable to deserialize string ""{0}"" to Type {1}",
+                        configRaw,
+                        typeof(T).ToString());
+                }
+            }
+
             if (config == null)
             {
                 config = new T();
