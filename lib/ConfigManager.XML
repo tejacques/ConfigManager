@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConfigManager</name>
+    </assembly>
+    <members>
+        <member name="T:ConfigManager.Configuration">
+            <summary>
+            A data type containing metadata about a configuration file.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.Configuration.Parsed">
+            <summary>
+            The parsed object from the configuration file.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.Configuration.Raw">
+            <summary>
+            The raw text read from the configuration file.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.Configuration.FilePath">
+            <summary>
+            The filepath to the configuration file.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.Configuration.LastUpdated">
+            <summary>
+            The time the configuration file was last updated.
+            </summary>
+        </member>
+        <member name="T:ConfigManager.ConfigManager">
+            <summary>
+            A utility class to make managing configuration files painless.
+            ConfigManager uses json configuration files which map to strongly
+            typed C# objects using ServiceStack.Text.DeserializeJson
+            </summary>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.AddConfig``1(System.String,System.String,System.Boolean)">
+            <summary>
+            Adds a configuration to the manager.
+            </summary>
+            <typeparam name="T">
+            The type of the configuration object.
+            </typeparam>
+            <param name="configName">
+            The name of the configuration object to add.
+            </param>
+            <param name="configPath">
+            The file path (relative or absolute) to add.
+            </param>
+            <param name="update">
+            Optional boolean argument that specifies
+            the config should be updated if it exists.
+            </param>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.GetCreateConfig``1(System.String,System.String,System.Boolean)">
+            <summary>
+            Adds and then gets the configuration of a given name.
+            </summary>
+            <typeparam name="T">
+            The type of the configuration object.
+            </typeparam>
+            <param name="configName">
+            The name of the configuration object to add.
+            </param>
+            <param name="configPath">
+            The file path (relative or absolute) to add.
+            </param>
+            <param name="update">
+            Optional boolean argument that specifies the
+            config should be updated if it exists.
+            </param>
+            <returns>
+            An object of type T with the values in the specified config file.
+            </returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.CreateConfig``1(System.String)">
+            <summary>
+            Creates a Configuration of the given type
+            from the specified file path.
+            </summary>
+            <typeparam name="T">
+            The type of the configuration object.
+            </typeparam>
+            <param name="configPath">
+            The file path (relative or absolute) of the configuration file.
+            </param>
+            <returns>
+            An object of type T with the values in the specified config file.
+            </returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.RemoveConfig(System.String)">
+            <summary>
+            Remove the specified config file from the ConfigManager
+            </summary>
+            <param name="key">The specified config file key</param>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.GetConfig``1(System.String)">
+            <summary>
+            Returns the configuration object of the specified type and name
+            from the in-memory dictionary of the ConfigManager.
+            </summary>
+            <typeparam name="T">The type of the configuration object.
+            </typeparam>
+            <param name="configName">The name of the configuration
+            object to retrieve.</param>
+            <returns>An object of type T with the values in the
+            ConfigManager.</returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.GetConfigUpdateTime(System.String)">
+            <summary>
+            Returns the DateTime that the specified file was last written to.
+            </summary>
+            <param name="configPath">The file path.</param>
+            <returns>
+            The DateTime that the specified file was last written to.
+            </returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.ReadConfig(System.String)">
+            <summary>
+            Reads a relative or absolute file path and returns the contents.
+            Nonrooted file paths are checked relative to the configured
+            search directories.
+            </summary>
+            <param name="configPath">The file path.</param>
+            <returns>The contents of the file that was found, or empty string
+            if no file present.</returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.ParseConfig``1(System.String)">
+            <summary>
+            Parses json into the specified object type.
+            </summary>
+            <typeparam name="T">The object type to return.</typeparam>
+            <param name="configRaw">The raw json.</param>
+            <returns>
+            The contents of the raw json as the specified object type.
+            </returns>
+        </member>
+        <member name="T:ConfigManager.ConfigManager.ConfigKeys">
+            <summary>
+            A Utility Enum to ensure that typos aren't make for
+            global configuration files.
+            </summary>
+        </member>
+        <member name="F:ConfigManager.ConfigManager.ConfigKeys.ConfigPathsConfig">
+            <summary>
+            Maps to the string of the same name.
+            </summary>
+        </member>
+        <member name="T:ConfigManager.ConfigClasses.ConfigPathsConfig">
+            <summary>
+            The strongly typed class to deserialize the global configuration file ConfigPaths.conf
+            </summary>
+        </member>
+        <member name="M:ConfigManager.ConfigClasses.ConfigPathsConfig.#ctor">
+            <summary>
+            Contructs the configuration with the default values for search paths,
+            which are: the local application root directory, C:/Configs, and
+            D:/Configs
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigClasses.ConfigPathsConfig.Paths">
+            <summary>
+            An ordered list of search paths to search in for configuration files.
+            </summary>
+        </member>
+    </members>
+</doc>
