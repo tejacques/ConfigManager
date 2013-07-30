@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ConfigManager</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <title>ConfigManager</title>
     <authors>Tom Jacques</authors>
     <owners>Tom Jacques</owners>
@@ -17,6 +17,9 @@
         An open source helper library for retrieving strongly typed automatically updating configuration data from config files.
     </summary>
     <releaseNotes>
+        Version 1.0.1:
+         - Fix a bug in updating files where the key had an incorrect substring check
+
         Version 1.0.0:
          - File handlers to automatically update config data in the running program
          - Generic functions to retrieve configuration data as a strongly typed object
