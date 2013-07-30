@@ -292,15 +292,14 @@
             string conf = ".conf";
             if (key.EndsWith(conf))
             {
-                key = key.Replace(".conf","");
-                key.Substring(0, key.Length - conf.Length);
+                key = key.Substring(0, key.Length - conf.Length);
             }
 
 #if DEBUG
             string dev = ".dev";
             if (key.EndsWith(dev))
             {
-                key.Substring(0, key.Length - dev.Length);
+                key = key.Substring(0, key.Length - dev.Length);
             }
 #endif
 
