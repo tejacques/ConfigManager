@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>ConfigManger</id>
+    <id>ConfigManager</id>
     <version>1.0.0</version>
     <title>ConfigManager</title>
     <authors>Tom Jacques</authors>
     <owners>Tom Jacques</owners>
     <licenseUrl>https://github.com/tejacques/ConfigManager/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/tejacques/ConfigManager</projectUrl>
-    <iconUrl></iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
         Binaries for the ConfigManager library.
