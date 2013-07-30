@@ -14,9 +14,11 @@
     [TestFixture]
     public class ConfigManagerTests
     {
+        private static int loops;
         [TestFixtureSetUp]
         public void SetUp()
         {
+            loops = 10000;
         }
 
         [Test]
@@ -40,7 +42,7 @@
         [Test]
         public static void TestConfigParseSerial()
         {
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < loops; i++)
             {
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                     ("Test2");
@@ -54,9 +56,7 @@
         [Test]
         public static void TestConfigParseParallel()
         {
-            ParallelOptions options = new ParallelOptions();
-            options.MaxDegreeOfParallelism = 500;
-            Parallel.For(0, 100000, options, (x) =>
+            Parallel.For(0, loops, (x) =>
             {
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                     ("Test3");
@@ -70,9 +70,7 @@
         [Test]
         public static void TestConfigParseMultipleParallel()
         {
-            ParallelOptions options = new ParallelOptions();
-            options.MaxDegreeOfParallelism = 500;
-            Parallel.For(0, 100000, options, (x) =>
+            Parallel.For(0, loops, (x) =>
             {
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                     ("Test_" + (x % 100), "");
