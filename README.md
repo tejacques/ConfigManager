@@ -51,3 +51,54 @@ The output will be:
   John
   Harold
 ```
+
+## Creating a Configuration class to use
+
+Part of the magic is that ConfigManager can translate your config files to any strongly typed object you define. The only constraint is that it must implement new(). The reason why is so that everything that comes back from the command is guaranteed to not be null.
+
+```csharp
+public class ExampleConfig
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public Website { get; set; }
+    
+    // Provide the default values of your config class here
+    public ExampleConfig()
+    {
+        Name = "Default Name";
+        Age = 0;
+        Website = "www.example.org";
+    }
+}
+```
+
+ProjectDirectory/Config/ExampleConfig.conf
+
+```json
+{
+  "Name" : "Test Name",
+  "Age" : 25,
+  "Website" : "https://github.com/tejacques/ConfigManager/"
+}
+```
+
+```csharp
+public void ExampleConfigTest()
+{
+    ExampleConfig exampleConfig = ConfigManager.GetCreateConfig<ExampleConfig>("ExampleConfig");
+    Console.WriteLine(exampleConfig.Name);      // Test Name
+    Console.WriteLine(exampleConfig.Age);       // 25
+    Console.WriteLine(exampleConfig.Website);   // https://github.com/tejacques/ConfigManager/
+}
+```
+
+Additional Features
+-------------------
+
+While in debug mode, ConfigManager will first look for files that end in .dev.conf with the given name, unless a fully specified file path is given. This is ideal for different thing such as connection strings between dev and prod.
+
+Road Map
+--------
+
+- yaml support
