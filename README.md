@@ -52,7 +52,7 @@ The output will be:
   Harold
 ```
 
-## Creating a Configuration class to use
+### Creating a Configuration class to use
 
 Part of the magic is that ConfigManager can translate your config files to any strongly typed object you define. The only constraint is that it must implement new(). The reason why is so that everything that comes back from the command is guaranteed to not be null.
 
