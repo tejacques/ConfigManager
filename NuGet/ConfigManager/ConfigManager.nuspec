@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ConfigManager</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <title>ConfigManager</title>
     <authors>Tom Jacques</authors>
     <owners>Tom Jacques</owners>
@@ -17,6 +17,10 @@
         An open source helper library for retrieving strongly typed automatically updating configuration data from config files.
     </summary>
     <releaseNotes>
+        Version 1.0.2:
+         - Add a DevMode setting. If true, ConfigManager will first check for config files ending with .dev.conf.
+           Useful for having different settings on development.
+
         Version 1.0.1:
          - Fix a bug in updating files where the key had an incorrect substring check
 
