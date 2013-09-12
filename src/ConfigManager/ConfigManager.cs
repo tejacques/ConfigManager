@@ -48,6 +48,7 @@
         private static ConcurrentDictionary<string, Configuration> _configs;
         private static List<FileSystemWatcher> _fsWatchers;
         private static readonly object _fsWatcherLock = new object();
+        public static bool DevMode { get; set; }
 
         /// <summary>
         /// A Utility Enum to ensure that typos aren't make for
@@ -180,9 +181,12 @@
 
         private static string GetPath(string configPath)
         {
-#if DEBUG
-            string devConfigPath = configPath.Replace(".conf", ".dev.conf");
-#endif
+            string devConfigPath = "";
+            if (DevMode)
+            {
+                devConfigPath = configPath.Replace(".conf", ".dev.conf");
+            }
+
             if (!Path.IsPathRooted(configPath))
             {
                 DirectoryInfo[] paths = GetConfig<ConfigPathsConfig>(
@@ -196,11 +200,14 @@
                     }
 
                     FileInfo fi = null;
-#if DEBUG
-                    fi = path.EnumerateFiles(
-                            devConfigPath,
-                            SearchOption.AllDirectories).FirstOrDefault();
-#endif
+
+                    if (DevMode)
+                    {
+                        fi = path.EnumerateFiles(
+                                devConfigPath,
+                                SearchOption.AllDirectories).FirstOrDefault();
+                    }
+
                     if (null == fi)
                     {
                         fi = path.EnumerateFiles(
