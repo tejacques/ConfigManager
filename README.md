@@ -101,4 +101,6 @@ While in debug mode, ConfigManager will first look for files that end in .dev.co
 Road Map
 --------
 
+- Add persistent storage getter/setter delegates
+- Add configurable options to roll up file changes into persistent storage
 - yaml support
