@@ -19,6 +19,7 @@
         public void SetUp()
         {
             loops = 10000;
+            ConfigManager.DevMode = true;
         }
 
         [Test]

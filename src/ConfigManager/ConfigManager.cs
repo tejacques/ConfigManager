@@ -14,6 +14,33 @@
     using System.Threading.Tasks;
 
     /// <summary>
+    /// A data type containing metadata about a configuration item.
+    /// </summary>
+    public class ConfigurationItem
+    {
+        /// <summary>
+        /// The name of the configuration item.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The raw configuration data.
+        /// </summary>
+        public string Data { get; set; }
+
+        /// <summary>
+        /// The time the configuration file was last updated.
+        /// </summary>
+        public DateTime LastUpdated { get; set; }
+
+        /// <summary>
+        /// A bool indicating whether the configuration item came from
+        /// ConfigManager or a user-specified source delegate.
+        /// </summary>
+        public bool FromConfigManager { get; set; }
+    }
+
+    /// <summary>
     /// A data type containing metadata about a configuration file.
     /// </summary>
     public class Configuration
@@ -48,6 +75,10 @@
         private static ConcurrentDictionary<string, Configuration> _configs;
         private static List<FileSystemWatcher> _fsWatchers;
         private static readonly object _fsWatcherLock = new object();
+
+        private static Func<string, ConfigurationItem> _getConfiguration;
+        private static Action<ConfigurationItem> _putConfiguration;
+
         public static bool DevMode { get; set; }
 
         /// <summary>
@@ -76,6 +107,25 @@
             SetupWatchDirectories();
         }
 
+        /// <summary>
+        /// A delegate settable by the user which says how to try
+        /// and get the configuration before going to the file system.
+        /// </summary>
+        public static Func<string, ConfigurationItem> GetConfiguration
+        {
+            private get { return _getConfiguration; }
+            set { _getConfiguration = value; }
+        }
+
+        /// <summary>
+        /// A delegate settable by the user which says what to do after
+        /// getting the configuration from the file system.
+        /// </summary>
+        public static Action<ConfigurationItem> PutConfiguration
+        {
+            private get { return _putConfiguration; }
+            set { _putConfiguration = value; }
+        }
 
         /// <summary>
         /// Adds a configuration to the manager.
@@ -112,13 +162,13 @@
             _configs.AddOrUpdate(configName,
                 (x) =>
                 {
-                    return CreateConfig<T>(configPath);
+                    return CreateConfig<T>(configName, configPath);
                 },
                 (x, y) =>
                 {
                     if (update)
                     {
-                        y = CreateConfig<T>(configPath);
+                        y = CreateConfig<T>(configName, configPath);
                     }
                     return y;
                 });
@@ -166,10 +216,14 @@
         /// <returns>
         /// An object of type T with the values in the specified config file.
         /// </returns>
-        private static Configuration CreateConfig<T>(string configPath)
+        private static Configuration CreateConfig<T>(string configName, string configPath)
             where T : new()
         {
             Configuration config = new Configuration();
+
+            var fromFile = GetConfigFromFile(configName, configPath);
+            var fromDelegate = GetConfigFromDelegate(configName);
+            HandlePutConfig(fromFile, fromDelegate);
 
             config.FilePath = GetPath(configPath);
             config.LastUpdated = GetConfigUpdateTime(config.FilePath);
@@ -177,6 +231,61 @@
             config.Parsed = ParseConfig<T>(config.Raw);
 
             return config;
+        }
+
+        /// <summary>
+        /// Gets a configuration item from a file.
+        /// </summary>
+        /// <param name="name">The name of the configuration.</param>
+        /// <param name="path">The path of the file.</param>
+        /// <returns>The configuration item pulled from the specified file.</returns>
+        private static ConfigurationItem GetConfigFromFile(string name, string path)
+        {
+            ConfigurationItem configItem = new ConfigurationItem();
+
+            configItem.Name = name;
+            configItem.Data = ReadConfig(path);
+            configItem.LastUpdated = GetConfigUpdateTime(path);
+            configItem.FromConfigManager = true;
+
+            return configItem;
+        }
+
+        /// <summary>
+        /// Get a configuration item from a delegate.
+        /// </summary>
+        /// <param name="name">The name of the configuration.</param>
+        /// <returns>The configuration item pulled from the delegate.</returns>
+        private static ConfigurationItem GetConfigFromDelegate(string name)
+        {
+            ConfigurationItem configItem = null;
+
+            if(null != _getConfiguration)
+            {
+                configItem = _getConfiguration(name);
+            }
+
+            if (null == configItem)
+            {
+                configItem = new ConfigurationItem();
+            }
+
+            configItem.Name = name;
+
+            return configItem;
+        }
+
+        private static void HandlePutConfig(
+            ConfigurationItem fromFile,
+            ConfigurationItem fromDelegate)
+        {
+            if (fromFile.Name == fromDelegate.Name
+                && fromFile.LastUpdated > fromDelegate.LastUpdated
+                && !string.IsNullOrEmpty(fromFile.Data)
+                && null != _putConfiguration)
+            {
+                Task.Run(() => _putConfiguration(fromFile));
+            }
         }
 
         private static string GetPath(string configPath)
@@ -302,13 +411,14 @@
                 key = key.Substring(0, key.Length - conf.Length);
             }
 
-#if DEBUG
-            string dev = ".dev";
-            if (key.EndsWith(dev))
+            if (DevMode)
             {
-                key = key.Substring(0, key.Length - dev.Length);
+                string dev = ".dev";
+                if (key.EndsWith(dev))
+                {
+                    key = key.Substring(0, key.Length - dev.Length);
+                }
             }
-#endif
 
             _configs.TryRemove(key, out config);
 
