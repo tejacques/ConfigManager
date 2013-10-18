@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ConfigManager</id>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <title>ConfigManager</title>
     <authors>Tom Jacques</authors>
     <owners>Tom Jacques</owners>
@@ -17,6 +17,11 @@
         An open source helper library for retrieving strongly typed automatically updating configuration data from config files.
     </summary>
     <releaseNotes>
+        Notes:
+
+        Version 1.0.3:
+         - Update dependency version compatibility
+
         Version 1.0.2:
          - Add a DevMode setting. If true, ConfigManager will first check for config files ending with .dev.conf.
            Useful for having different settings on development.
@@ -29,7 +34,7 @@
          - Generic functions to retrieve configuration data as a strongly typed object
     </releaseNotes>
     <dependencies>
-        <dependency id="NLog" version="[2.0.0.0, 2.1.0.0)" />
+        <dependency id="NLog" version="[2.0.0.0, 2.2.0.0)" />
         <dependency id="ServiceStack.Text" version="[3.3.0, 4.0.0)" />
     </dependencies>
     <copyright>Copyright 2013</copyright>
