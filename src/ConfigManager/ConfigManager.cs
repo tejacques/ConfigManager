@@ -79,6 +79,10 @@
         private static Func<string, ConfigurationItem> _getConfiguration;
         private static Action<ConfigurationItem> _putConfiguration;
 
+        /// <summary>
+        /// Development mode. If true, ConfigManager will look for
+        /// files ending with .dev.conf rather than .conf
+        /// </summary>
         public static bool DevMode { get; set; }
 
         /// <summary>
@@ -210,6 +214,9 @@
         /// <typeparam name="T">
         /// The type of the configuration object.
         /// </typeparam>
+        /// <param name="configName">
+        /// The name of the configuration.
+        /// </param>
         /// <param name="configPath">
         /// The file path (relative or absolute) of the configuration file.
         /// </param>
@@ -505,6 +512,10 @@
             try
             {
                 config = File.ReadAllText(configPath);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                // Ignore
             }
             catch (Exception e)
             {
