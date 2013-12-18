@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ConfigManager</id>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
     <title>ConfigManager</title>
     <authors>Tom Jacques</authors>
     <owners>Tom Jacques</owners>
@@ -19,6 +19,11 @@
     <releaseNotes>
         Notes:
 
+        Version 1.1.0:
+         - Add a delegate to retrieve the configuration from a user defined location (ex: read config from a database).
+         - Add a delegate to run if the configuration file is newer than the configuration from the user defined location (ex: update database).
+         - Do not log an error for a missing configuration file, only if the file existed and failed to read.
+
         Version 1.0.3:
          - Update dependency version compatibility
 
@@ -34,7 +39,7 @@
          - Generic functions to retrieve configuration data as a strongly typed object
     </releaseNotes>
     <dependencies>
-        <dependency id="NLog" version="[2.0.0.0, 2.2.0.0)" />
+        <dependency id="NLog" version="[2.0.0.0, 3.0.0.0)" />
         <dependency id="ServiceStack.Text" version="[3.3.0, 4.0.0)" />
     </dependencies>
     <copyright>Copyright 2013</copyright>
