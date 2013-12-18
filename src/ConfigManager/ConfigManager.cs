@@ -223,7 +223,8 @@
         /// <returns>
         /// An object of type T with the values in the specified config file.
         /// </returns>
-        private static Configuration CreateConfig<T>(string configName, string configPath)
+        private static Configuration CreateConfig<T>(
+            string configName, string configPath)
             where T : new()
         {
             Configuration config = new Configuration();
@@ -245,8 +246,11 @@
         /// </summary>
         /// <param name="name">The name of the configuration.</param>
         /// <param name="path">The path of the file.</param>
-        /// <returns>The configuration item pulled from the specified file.</returns>
-        private static ConfigurationItem GetConfigFromFile(string name, string path)
+        /// <returns>
+        /// The configuration item pulled from the specified file.
+        /// </returns>
+        private static ConfigurationItem GetConfigFromFile(
+            string name, string path)
         {
             ConfigurationItem configItem = new ConfigurationItem();
 
@@ -543,7 +547,8 @@
             {
                 ConfigLogger.Log(
                     LogLevel.Error,
-                    "ConfigManager Error: Cannot deserialize null string for Type {0}",
+                    "ConfigManager Error: "
+                    +"Cannot deserialize null string for Type {0}",
                     typeof(T).ToString());
             }
             else if (configRaw != string.Empty)
@@ -554,7 +559,8 @@
                 {
                     // Deserializing configraw failed, log configraw
                     ConfigLogger.Error(
-                        @"ConfigManager Error: Unable to deserialize string ""{0}"" to Type {1}",
+                        "ConfigManager Error: "
+                        +@"Unable to deserialize string ""{0}"" to Type {1}",
                         configRaw,
                         typeof(T).ToString());
                 }

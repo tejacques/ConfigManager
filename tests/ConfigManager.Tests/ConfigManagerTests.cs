@@ -25,7 +25,8 @@
         [Test]
         public static void TestConfigManager()
         {
-            TestConfig config = ConfigManager.GetCreateConfig<TestConfig>("TestDefault");
+            TestConfig config = 
+                ConfigManager.GetCreateConfig<TestConfig>("TestDefault");
             Assert.NotNull(config);
         }
 
@@ -86,7 +87,8 @@
         public static void TestConfigEvents()
         {
             // Test getting the config when the config file doesn't exist
-            TestConfig config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
+            TestConfig config = 
+                ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
             Assert.NotNull(config);
             Assert.AreEqual(config.Foo, "foo");
             Assert.AreEqual(config.Bar, "bar");
@@ -96,7 +98,9 @@
             string path = "TestUpdate.conf";
             using (StreamWriter sw = new StreamWriter(path, append:true))
             {
-                sw.Write(ConfigManager.GetCreateConfig<TestConfig>("Test1").ToJson());
+                sw.Write(ConfigManager
+                    .GetCreateConfig<TestConfig>("Test1")
+                    .ToJson());
                 sw.Flush();
             }
 
