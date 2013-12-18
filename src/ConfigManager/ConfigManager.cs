@@ -229,13 +229,18 @@
         {
             Configuration config = new Configuration();
 
-            var fromFile = GetConfigFromFile(configName, configPath);
+            var path = GetPath(configPath);
+            var fromFile = GetConfigFromFile(configName, path);
             var fromDelegate = GetConfigFromDelegate(configName);
             HandlePutConfig(fromFile, fromDelegate);
 
-            config.FilePath = GetPath(configPath);
-            config.LastUpdated = GetConfigUpdateTime(config.FilePath);
-            config.Raw = ReadConfig(config.FilePath);
+            var newest = fromFile.LastUpdated > fromDelegate.LastUpdated
+                ? fromFile
+                : fromDelegate;
+
+            config.FilePath = path;
+            config.LastUpdated = newest.LastUpdated;
+            config.Raw = newest.Data;
             config.Parsed = ParseConfig<T>(config.Raw);
 
             return config;
@@ -290,10 +295,10 @@
             ConfigurationItem fromFile,
             ConfigurationItem fromDelegate)
         {
-            if (fromFile.Name == fromDelegate.Name
+            if (null != _putConfiguration
+                && fromFile.Name == fromDelegate.Name
                 && fromFile.LastUpdated > fromDelegate.LastUpdated
-                && !string.IsNullOrEmpty(fromFile.Data)
-                && null != _putConfiguration)
+                && !string.IsNullOrEmpty(fromFile.Data))
             {
                 Task.Run(() => _putConfiguration(fromFile));
             }
