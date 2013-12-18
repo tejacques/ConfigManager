@@ -4,6 +4,32 @@
         <name>ConfigManager</name>
     </assembly>
     <members>
+        <member name="T:ConfigManager.ConfigurationItem">
+            <summary>
+            A data type containing metadata about a configuration item.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigurationItem.Name">
+            <summary>
+            The name of the configuration item.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigurationItem.Data">
+            <summary>
+            The raw configuration data.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigurationItem.LastUpdated">
+            <summary>
+            The time the configuration file was last updated.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigurationItem.FromConfigManager">
+            <summary>
+            A bool indicating whether the configuration item came from
+            ConfigManager or a user-specified source delegate.
+            </summary>
+        </member>
         <member name="T:ConfigManager.Configuration">
             <summary>
             A data type containing metadata about a configuration file.
@@ -75,7 +101,7 @@
             An object of type T with the values in the specified config file.
             </returns>
         </member>
-        <member name="M:ConfigManager.ConfigManager.CreateConfig``1(System.String)">
+        <member name="M:ConfigManager.ConfigManager.CreateConfig``1(System.String,System.String)">
             <summary>
             Creates a Configuration of the given type
             from the specified file path.
@@ -83,12 +109,32 @@
             <typeparam name="T">
             The type of the configuration object.
             </typeparam>
+            <param name="configName">
+            The name of the configuration.
+            </param>
             <param name="configPath">
             The file path (relative or absolute) of the configuration file.
             </param>
             <returns>
             An object of type T with the values in the specified config file.
             </returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.GetConfigFromFile(System.String,System.String)">
+            <summary>
+            Gets a configuration item from a file.
+            </summary>
+            <param name="name">The name of the configuration.</param>
+            <param name="path">The path of the file.</param>
+            <returns>
+            The configuration item pulled from the specified file.
+            </returns>
+        </member>
+        <member name="M:ConfigManager.ConfigManager.GetConfigFromDelegate(System.String)">
+            <summary>
+            Get a configuration item from a delegate.
+            </summary>
+            <param name="name">The name of the configuration.</param>
+            <returns>The configuration item pulled from the delegate.</returns>
         </member>
         <member name="M:ConfigManager.ConfigManager.RemoveConfig(System.String)">
             <summary>
@@ -137,6 +183,24 @@
             The contents of the raw json as the specified object type.
             </returns>
         </member>
+        <member name="P:ConfigManager.ConfigManager.DevMode">
+            <summary>
+            Development mode. If true, ConfigManager will look for
+            files ending with .dev.conf rather than .conf
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigManager.GetConfiguration">
+            <summary>
+            A delegate settable by the user which says how to try
+            and get the configuration before going to the file system.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigManager.PutConfiguration">
+            <summary>
+            A delegate settable by the user which says what to do after
+            getting the configuration from the file system.
+            </summary>
+        </member>
         <member name="T:ConfigManager.ConfigManager.ConfigKeys">
             <summary>
             A Utility Enum to ensure that typos aren't make for
@@ -150,19 +214,22 @@
         </member>
         <member name="T:ConfigManager.ConfigClasses.ConfigPathsConfig">
             <summary>
-            The strongly typed class to deserialize the global configuration file ConfigPaths.conf
+            The strongly typed class to deserialize the
+            global configuration file ConfigPaths.conf
             </summary>
         </member>
         <member name="M:ConfigManager.ConfigClasses.ConfigPathsConfig.#ctor">
             <summary>
-            Contructs the configuration with the default values for search paths,
-            which are: the local application root directory, C:/Configs, and
+            Contructs the configuration with the default
+            values for search paths, which are: the local
+            application root directory, C:/Configs, and
             D:/Configs
             </summary>
         </member>
         <member name="P:ConfigManager.ConfigClasses.ConfigPathsConfig.Paths">
             <summary>
-            An ordered list of search paths to search in for configuration files.
+            An ordered list of search paths to search
+            in for configuration files.
             </summary>
         </member>
     </members>
