@@ -96,7 +96,7 @@ public void ExampleConfigTest()
 Additional Features
 -------------------
 
-While in debug mode, ConfigManager will first look for files that end in .dev.conf with the given name, unless a fully specified file path is given. This is ideal for different thing such as connection strings between dev and prod.
+While in debug mode, ConfigManager will first look for files that end in .dev.conf with the given name, unless a fully specified file path is given. This is ideal for things that differ between dev and prod such as a connection string.
 
 Road Map
 --------
