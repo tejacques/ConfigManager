@@ -1,7 +1,6 @@
 ﻿namespace ConfigManager
 {
     using ConfigClasses;
-    using NLog;
     using ServiceStack.Text;
     using System;
     using System.Collections.Generic;
@@ -66,8 +65,6 @@
     /// </summary>
     public class ConfigManager
     {
-        private static Logger ConfigLogger =
-            LogManager.GetCurrentClassLogger();
         private static ConcurrentDictionary<string, Configuration> _configs;
         private static List<FileSystemWatcher> _fsWatchers;
         private static readonly object _fsWatcherLock = new object();
@@ -80,6 +77,16 @@
         /// files ending with .dev.conf rather than .conf
         /// </summary>
         public static bool DevMode { get; set; }
+
+        /// <summary>
+        /// User provided Log function.
+        /// </summary>
+        public static Action<string> Log{ get; set; }
+
+        /// <summary>
+        /// User provided LogException function
+        /// </summary>
+        public static Action<string, Exception> LogException { get; set; }
 
         /// <summary>
         /// A Utility Enum to ensure that typos aren't make for
@@ -447,10 +454,12 @@
 
         private static void HandleError(object sender, ErrorEventArgs e)
         {
-            ConfigLogger.LogException(
-                LogLevel.Error,
-                "Exception thrown by FileSystemWatcher",
-                e.GetException());
+            if (null != LogException)
+            {
+                LogException(
+                    "Exception thrown by FileSystemWatcher",
+                    e.GetException());
+            }
         }
 
         private static void HandleRename(object sender, RenamedEventArgs e)
@@ -492,10 +501,12 @@
             }
             catch (Exception e)
             {
-                ConfigLogger.LogException(
-                    LogLevel.Error,
-                    "ConfigManager Error: could not read file creation time: "
-                    + configPath, e);
+                if (null != LogException)
+                {
+                    LogException(
+                        "ConfigManager Error: could not read file creation time: "
+                        + configPath, e);
+                }
             }
 
             return t;
@@ -523,10 +534,12 @@
             }
             catch (Exception e)
             {
-                ConfigLogger.LogException(
-                    LogLevel.Error,
-                    "ConfigManager Error: could not read file: "
-                    + configPath, e);
+                if (null != LogException)
+                {
+                    LogException(
+                        "ConfigManager Error: could not read file: "
+                        + configPath, e);
+                }
             }
 
             return config;
@@ -545,24 +558,26 @@
             T config = default(T);
             if (configRaw == null)
             {
-                ConfigLogger.Log(
-                    LogLevel.Error,
+                if (null != Log)
+                {
+                    Log(string.Format(
                     "ConfigManager Error: "
-                    +"Cannot deserialize null string for Type {0}",
-                    typeof(T).ToString());
+                    + "Cannot deserialize null string for Type {0}",
+                    typeof(T).ToString()));
+                }
             }
             else if (configRaw != string.Empty)
             {
                 config = JsonSerializer.DeserializeFromString<T>(configRaw);
 
-                if (config == null)
+                if (null == config && null != Log)
                 {
                     // Deserializing configraw failed, log configraw
-                    ConfigLogger.Error(
+                    Log(string.Format(
                         "ConfigManager Error: "
                         +@"Unable to deserialize string ""{0}"" to Type {1}",
                         configRaw,
-                        typeof(T).ToString());
+                        typeof(T).ToString()));
                 }
             }
 
