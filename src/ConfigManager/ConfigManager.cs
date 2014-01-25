@@ -46,10 +46,6 @@
     public class Configuration
     {
         /// <summary>
-        /// The parsed object from the configuration file.
-        /// </summary>
-        public object Parsed { get; set; }
-        /// <summary>
         /// The raw text read from the configuration file.
         /// </summary>
         public string Raw { get; set; }
@@ -241,7 +237,6 @@
             config.FilePath = path;
             config.LastUpdated = newest.LastUpdated;
             config.Raw = newest.Data;
-            config.Parsed = ParseConfig<T>(config.Raw);
 
             return config;
         }
@@ -478,7 +473,7 @@
         {
             Configuration configuration;
             _configs.TryGetValue(configName, out configuration);
-            return configuration == null ? new T() : (T)configuration.Parsed;
+            return configuration == null ? new T() : ParseConfig<T>(configuration.Raw);
         }
 
         /// <summary>
