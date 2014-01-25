@@ -184,6 +184,16 @@
             files ending with .dev.conf rather than .conf
             </summary>
         </member>
+        <member name="P:ConfigManager.ConfigManager.Log">
+            <summary>
+            User provided Log function.
+            </summary>
+        </member>
+        <member name="P:ConfigManager.ConfigManager.LogException">
+            <summary>
+            User provided LogException function
+            </summary>
+        </member>
         <member name="P:ConfigManager.ConfigManager.GetConfiguration">
             <summary>
             A delegate settable by the user which says how to try
