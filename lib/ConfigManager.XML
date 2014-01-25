@@ -35,11 +35,6 @@
             A data type containing metadata about a configuration file.
             </summary>
         </member>
-        <member name="P:ConfigManager.Configuration.Parsed">
-            <summary>
-            The parsed object from the configuration file.
-            </summary>
-        </member>
         <member name="P:ConfigManager.Configuration.Raw">
             <summary>
             The raw text read from the configuration file.
