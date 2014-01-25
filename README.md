@@ -23,7 +23,7 @@ I wanted a strongly typed configuration system that would automatically update i
 Example Usage
 -------------
 
-ConfigManager is a global statically available static class that is typically used as follows:
+ConfigManager is a globally available static class that is typically used as follows:
 
 ProjectDirectory/Config/configuredNames.conf
 ```json
