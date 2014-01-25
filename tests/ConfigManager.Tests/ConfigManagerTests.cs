@@ -18,7 +18,7 @@
         [TestFixtureSetUp]
         public void SetUp()
         {
-            loops = 10000;
+            loops = 100000;
             ConfigManager.DevMode = true;
         }
 
