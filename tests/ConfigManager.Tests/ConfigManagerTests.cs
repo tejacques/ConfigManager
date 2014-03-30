@@ -178,9 +178,11 @@
             Assert.AreEqual("2", config.Bar);
             Assert.AreEqual("3", config.Baz);
 
-            using (StreamWriter sw = new StreamWriter(path, append: true))
+            using (StreamWriter sw = new StreamWriter(path, false))
             {
-                sw.Write(" ");
+                sw.Write(JsonConvert.SerializeObject(
+                    ConfigManager
+                    .GetCreateConfig<TestConfig>("Test2")));
                 sw.Flush();
             }
 
@@ -190,9 +192,9 @@
             // Re-grab the config from the ConfigManager
             config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
             Assert.NotNull(config);
-            Assert.AreEqual("1", config.Foo);
-            Assert.AreEqual("2", config.Bar);
-            Assert.AreEqual("3", config.Baz);
+            Assert.AreEqual("a", config.Foo);
+            Assert.AreEqual("b", config.Bar);
+            Assert.AreEqual("c", config.Baz);
 
             // Delete the config file
             if (File.Exists(path))
@@ -211,14 +213,88 @@
             Assert.AreEqual("baz", config.Baz);
         }
 
+        [Test]
+        public static void TestConfigEventsYaml()
+        {
+            // Test getting the config when the config file doesn't exist
+            TestConfig config =
+                ConfigManager.GetCreateConfig<TestConfig>("TestUpdateYaml");
+            Assert.NotNull(config);
+            Assert.AreEqual("foo", config.Foo);
+            Assert.AreEqual("bar", config.Bar);
+            Assert.AreEqual("baz", config.Baz);
+
+            // Create a new config file based on Test1
+            string path = "TestUpdateYaml.yaml";
+            using (StreamWriter sw = new StreamWriter(path, append: true))
+            {
+                var serializer = new YamlDotNet.Serialization.Serializer();
+                serializer.Serialize(sw,
+                    ConfigManager
+                    .GetCreateConfig<TestConfig>("Test1"));
+
+                sw.Flush();
+            }
+
+            // Sleep to let the ConfigManager deal with the events
+            Thread.Sleep(100);
+
+            // Re-grab the config from the ConfigManager
+            config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdateYaml");
+            Assert.NotNull(config);
+            Assert.AreEqual("1", config.Foo);
+            Assert.AreEqual("2", config.Bar);
+            Assert.AreEqual("3", config.Baz);
+
+            using (StreamWriter sw = new StreamWriter(path, append: false))
+            {
+                var serializer = new YamlDotNet.Serialization.Serializer();
+                serializer.Serialize(sw,
+                    ConfigManager
+                    .GetCreateConfig<TestConfig>("Test2"));
+
+                sw.Flush();
+            }
+
+            // Sleep to let the ConfigManager deal with the events
+            Thread.Sleep(100);
+
+            // Re-grab the config from the ConfigManager
+            config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdateYaml");
+            Assert.NotNull(config);
+            Assert.AreEqual("a", config.Foo);
+            Assert.AreEqual("b", config.Bar);
+            Assert.AreEqual("c", config.Baz);
+
+            // Delete the config file
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            // Sleep to let the ConfigManager deal with the events
+            Thread.Sleep(100);
+
+            // Re-grab the config from the ConfigManager
+            config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdateYaml");
+            Assert.NotNull(config);
+            Assert.AreEqual("foo", config.Foo);
+            Assert.AreEqual("bar", config.Bar);
+            Assert.AreEqual("baz", config.Baz);
+        }
+
         [TestFixtureTearDown]
         public static void TearDown()
         {
             // Delete the config file in case there was an error
-            string path = "TestUpdate.conf";
-            if (File.Exists(path))
+            string[] paths = { "TestUpdate.conf", "TestUpdateYaml.yaml" };
+
+            foreach (string path in paths)
             {
-                File.Delete(path);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
             }
         }
     }
