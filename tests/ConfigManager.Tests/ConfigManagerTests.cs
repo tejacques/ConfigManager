@@ -1,8 +1,9 @@
 ﻿namespace ConfigManager.Tests
 {
     using ConfigClasses;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using NUnit.Framework;
-    using ServiceStack.Text;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -15,11 +16,24 @@
     public class ConfigManagerTests
     {
         private static int loops;
+        private static string json = @"
+[
+""Foo"",
+""Bar"",
+""Baz"",
+""1"",""2"",""3"",""4"",""5"",""6"",""7"",""8"",""9"",""10"",
+""1"",""2"",""3"",""4"",""5"",""6"",""7"",""8"",""9"",""10"",
+""1"",""2"",""3"",""4"",""5"",""6"",""7"",""8"",""9"",""10"",
+""1"",""2"",""3"",""4"",""5"",""6"",""7"",""8"",""9"",""10"",
+""1"",""2"",""3"",""4"",""5"",""6"",""7"",""8"",""9"",""10""
+]
+";
         [TestFixtureSetUp]
         public void SetUp()
         {
             loops = 100000;
             ConfigManager.DevMode = true;
+            var parsedJsonDotNet = JsonConvert.DeserializeObject<List<string>>(json);
         }
 
         [Test]
@@ -36,9 +50,31 @@
             TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                 ("Test1");
             Assert.NotNull(config);
-            Assert.AreEqual(config.Foo, "1");
-            Assert.AreEqual(config.Bar, "2");
-            Assert.AreEqual(config.Baz, "3");
+            Assert.AreEqual("1", config.Foo);
+            Assert.AreEqual("2", config.Bar);
+            Assert.AreEqual("3", config.Baz);
+        }
+
+        [Test]
+        public static void TestConfigParseJson()
+        {
+            TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
+                ("TestJson");
+            Assert.NotNull(config);
+            Assert.AreEqual("1", config.Foo);
+            Assert.AreEqual("2", config.Bar);
+            Assert.AreEqual("3", config.Baz);
+        }
+
+        [Test]
+        public static void TestConfigParseYaml()
+        {
+            TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
+                ("TestYaml");
+            Assert.NotNull(config);
+            Assert.AreEqual("1", config.Foo);
+            Assert.AreEqual("2", config.Bar);
+            Assert.AreEqual("3", config.Baz);
         }
 
         [Test]
@@ -49,9 +85,23 @@
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                     ("Test2");
                 Assert.NotNull(config);
-                Assert.AreEqual(config.Foo, "a");
-                Assert.AreEqual(config.Bar, "b");
-                Assert.AreEqual(config.Baz, "c");
+                Assert.AreEqual("a", config.Foo);
+                Assert.AreEqual("b", config.Bar);
+                Assert.AreEqual("c", config.Baz);
+            }
+        }
+
+        [Test]
+        public static void TestConfigParseSerialYaml()
+        {
+            for (int i = 0; i < loops; i++)
+            {
+                TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
+                    ("TestYaml2");
+                Assert.NotNull(config);
+                Assert.AreEqual("a", config.Foo);
+                Assert.AreEqual("b", config.Bar);
+                Assert.AreEqual("c", config.Baz);
             }
         }
 
@@ -63,9 +113,23 @@
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                     ("Test3");
                 Assert.NotNull(config);
-                Assert.AreEqual(config.Foo, "!");
-                Assert.AreEqual(config.Bar, "@");
-                Assert.AreEqual(config.Baz, "#");
+                Assert.AreEqual("!", config.Foo);
+                Assert.AreEqual("@", config.Bar);
+                Assert.AreEqual("#", config.Baz);
+            });
+        }
+
+        [Test]
+        public static void TestConfigParseParallelYaml()
+        {
+            Parallel.For(0, loops, (x) =>
+            {
+                TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
+                    ("TestYaml3");
+                Assert.NotNull(config);
+                Assert.AreEqual("!", config.Foo);
+                Assert.AreEqual("@", config.Bar);
+                Assert.AreEqual("#", config.Baz);
             });
         }
 
@@ -77,9 +141,9 @@
                 TestConfig config = ConfigManager.GetCreateConfig<TestConfig>
                     ("Test_" + (x % 100), "");
                 Assert.NotNull(config);
-                Assert.AreEqual(config.Foo, "foo");
-                Assert.AreEqual(config.Bar, "bar");
-                Assert.AreEqual(config.Baz, "baz");
+                Assert.AreEqual("foo", config.Foo);
+                Assert.AreEqual("bar", config.Bar);
+                Assert.AreEqual("baz", config.Baz);
             });
         }
 
@@ -90,17 +154,17 @@
             TestConfig config = 
                 ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
             Assert.NotNull(config);
-            Assert.AreEqual(config.Foo, "foo");
-            Assert.AreEqual(config.Bar, "bar");
-            Assert.AreEqual(config.Baz, "baz");
+            Assert.AreEqual("foo", config.Foo);
+            Assert.AreEqual("bar", config.Bar);
+            Assert.AreEqual("baz", config.Baz);
 
             // Create a new config file based on Test1
             string path = "TestUpdate.conf";
             using (StreamWriter sw = new StreamWriter(path, append:true))
             {
-                sw.Write(ConfigManager
-                    .GetCreateConfig<TestConfig>("Test1")
-                    .ToJson());
+                sw.Write(JsonConvert.SerializeObject(
+                    ConfigManager
+                    .GetCreateConfig<TestConfig>("Test1")));
                 sw.Flush();
             }
 
@@ -110,9 +174,9 @@
             // Re-grab the config from the ConfigManager
             config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
             Assert.NotNull(config);
-            Assert.AreEqual(config.Foo, "1");
-            Assert.AreEqual(config.Bar, "2");
-            Assert.AreEqual(config.Baz, "3");
+            Assert.AreEqual("1", config.Foo);
+            Assert.AreEqual("2", config.Bar);
+            Assert.AreEqual("3", config.Baz);
 
             using (StreamWriter sw = new StreamWriter(path, append: true))
             {
@@ -126,9 +190,9 @@
             // Re-grab the config from the ConfigManager
             config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
             Assert.NotNull(config);
-            Assert.AreEqual(config.Foo, "1");
-            Assert.AreEqual(config.Bar, "2");
-            Assert.AreEqual(config.Baz, "3");
+            Assert.AreEqual("1", config.Foo);
+            Assert.AreEqual("2", config.Bar);
+            Assert.AreEqual("3", config.Baz);
 
             // Delete the config file
             if (File.Exists(path))
@@ -142,9 +206,9 @@
             // Re-grab the config from the ConfigManager
             config = ConfigManager.GetCreateConfig<TestConfig>("TestUpdate");
             Assert.NotNull(config);
-            Assert.AreEqual(config.Foo, "foo");
-            Assert.AreEqual(config.Bar, "bar");
-            Assert.AreEqual(config.Baz, "baz");
+            Assert.AreEqual("foo", config.Foo);
+            Assert.AreEqual("bar", config.Bar);
+            Assert.AreEqual("baz", config.Baz);
         }
 
         [TestFixtureTearDown]

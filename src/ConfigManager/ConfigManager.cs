@@ -1,7 +1,6 @@
 ﻿namespace ConfigManager
 {
     using ConfigClasses;
-    using ServiceStack.Text;
     using System;
     using System.Collections.Generic;
     using System.Collections.Concurrent;
@@ -11,6 +10,25 @@
     using System.Text;
     using System.Timers;
     using System.Threading.Tasks;
+
+    /// <summary>
+    /// The type of configuration file
+    /// </summary>
+    public enum ConfigType
+    {
+        /// <summary>
+        /// The config file type is unknown
+        /// </summary>
+        Unknown,
+        /// <summary>
+        /// The config file is Json
+        /// </summary>
+        Json,
+        /// <summary>
+        /// The config file is Yaml
+        /// </summary>
+        Yaml
+    }
 
     /// <summary>
     /// A data type containing metadata about a configuration item.
@@ -49,6 +67,10 @@
         /// </summary>
         public string Raw { get; set; }
         /// <summary>
+        /// The parsed object
+        /// </summary>
+        public object Parsed { get; set; }
+        /// <summary>
         /// The filepath to the configuration file.
         /// </summary>
         public string FilePath { get; set; }
@@ -56,6 +78,10 @@
         /// The time the configuration file was last updated.
         /// </summary>
         public DateTime LastUpdated { get; set; }
+        /// <summary>
+        /// The type of config file.
+        /// </summary>
+        public ConfigType ConfigType { get; set; }
     }
 
     /// <summary>
@@ -68,6 +94,12 @@
         private static ConcurrentDictionary<string, Configuration> _configs;
         private static List<FileSystemWatcher> _fsWatchers;
         private static readonly object _fsWatcherLock = new object();
+        private static readonly YamlDotNet
+                                .Serialization
+                                .Deserializer _yamlDeserializer =
+                                new YamlDotNet
+                                    .Serialization
+                                    .Deserializer(null, null, true);
 
         private static Func<string, ConfigurationItem> _getConfiguration;
         private static Action<ConfigurationItem> _putConfiguration;
@@ -163,7 +195,21 @@
 
             if (configPath == null)
             {
-                configPath = configName + ".conf";
+                var tmpPath = configName + ".conf";
+                configPath = tmpPath;
+
+                if (FileExists(tmpPath))
+                {
+                    configPath = tmpPath;
+                }
+                else if (FileExists(tmpPath = configName + ".json"))
+                {
+                    configPath = tmpPath;
+                }
+                else if (FileExists(tmpPath = configName + ".yaml"))
+                {
+                    configPath = tmpPath;
+                }
             }
 
             _configs.AddOrUpdate(configName,
@@ -203,11 +249,12 @@
         public static T GetCreateConfig<T>(
             string configName,
             string configPath = null,
-            bool update = false)
+            bool update = false,
+            bool cached = true)
             where T : new()
         {
             AddConfig<T>(configName, configPath: configPath, update: update);
-            return GetConfig<T>(configName);
+            return GetConfig<T>(configName, cached);
         }
 
         /// <summary>
@@ -244,6 +291,30 @@
             config.FilePath = path;
             config.LastUpdated = newest.LastUpdated;
             config.Raw = newest.Data;
+
+            if (config.FilePath.Length >= 5)
+            {
+                var extension = config
+                    .FilePath
+                    .Substring(config.FilePath.Length - 5, 5)
+                    .ToLowerInvariant();
+
+                switch(extension)
+                {
+                    case ".conf":
+                    case ".json":
+                        config.ConfigType = ConfigType.Json;
+                        break;
+                    case ".yaml":
+                        config.ConfigType = ConfigType.Yaml;
+                        break;
+                    default:
+                        config.ConfigType = ConfigType.Unknown;
+                        break;
+                }
+            }
+
+            config.Parsed = ParseConfig<T>(config.Raw, config.ConfigType);
 
             return config;
         }
@@ -311,7 +382,10 @@
             string devConfigPath = "";
             if (DevMode)
             {
-                devConfigPath = configPath.Replace(".conf", ".dev.conf");
+                devConfigPath = configPath
+                    .Replace(".conf", ".dev.conf")
+                    .Replace(".json", ".dev.json")
+                    .Replace(".yaml", ".dev.yaml");
             }
 
             if (!Path.IsPathRooted(configPath))
@@ -368,30 +442,41 @@
                 var renamedEventHandler =
                     new RenamedEventHandler(HandleRename);
 
+                string[] fileTypes = { "*.conf", "*.json", "*.yaml"};
+
                 _fsWatchers.AddRange(paths
                     .Where(path => null != path && path.Exists)
                     .Select(path =>
                     {
-                        var fsWatcher = new FileSystemWatcher(
-                            path.FullName, "*.conf");
+                        List<FileSystemWatcher> fileWatchers =
+                            new List<FileSystemWatcher>();
 
-                        fsWatcher.NotifyFilter =
-                              NotifyFilters.LastWrite
-                            | NotifyFilters.FileName
-                            | NotifyFilters.DirectoryName;
+                        foreach(var fileType in fileTypes)
+                        {
+                            var fsWatcher = new FileSystemWatcher(
+                                path.FullName, fileType);
 
-                        fsWatcher.IncludeSubdirectories = true;
+                            fsWatcher.NotifyFilter =
+                                  NotifyFilters.LastWrite
+                                | NotifyFilters.FileName
+                                | NotifyFilters.DirectoryName;
 
-                        fsWatcher.Changed += fsEventHandler;
-                        fsWatcher.Created += fsEventHandler;
-                        fsWatcher.Deleted += fsEventHandler;
-                        fsWatcher.Error += errorEventHandler;
-                        fsWatcher.Renamed += renamedEventHandler;
+                            fsWatcher.IncludeSubdirectories = true;
 
-                        fsWatcher.EnableRaisingEvents = true;
+                            fsWatcher.Changed += fsEventHandler;
+                            fsWatcher.Created += fsEventHandler;
+                            fsWatcher.Deleted += fsEventHandler;
+                            fsWatcher.Error += errorEventHandler;
+                            fsWatcher.Renamed += renamedEventHandler;
 
-                        return fsWatcher;
-                    }));
+                            fsWatcher.EnableRaisingEvents = true;
+
+                            fileWatchers.Add(fsWatcher);
+                        }
+
+                        return fileWatchers;
+                    })
+                    .SelectMany(fileWatchers => fileWatchers));
             }
         }
 
@@ -424,7 +509,12 @@
             key = key.Split('\\', '/').LastOrDefault();
 
             string conf = ".conf";
-            if (key.EndsWith(conf))
+            string json = ".json";
+            string yaml = ".yaml";
+
+            if (key.EndsWith(conf)
+                || key.EndsWith(json)
+                || key.EndsWith(yaml))
             {
                 key = key.Substring(0, key.Length - conf.Length);
             }
@@ -468,6 +558,11 @@
             RemoveConfig(e.Name);
         }
 
+        private static bool FileExists(string path)
+        {
+            return File.Exists(GetPath(path));
+        }
+
         /// <summary>
         /// Returns the configuration object of the specified type and name
         /// from the in-memory dictionary of the ConfigManager.
@@ -478,11 +573,18 @@
         /// object to retrieve.</param>
         /// <returns>An object of type T with the values in the
         /// ConfigManager.</returns>
-        public static T GetConfig<T>(string configName) where T : new()
+        public static T GetConfig<T>(string configName, bool cached = true)
+            where T : new()
         {
             Configuration configuration;
             _configs.TryGetValue(configName, out configuration);
-            return configuration == null ? new T() : ParseConfig<T>(configuration.Raw);
+            return configuration == null 
+                ? new T() 
+                : cached
+                    ? (T)configuration.Parsed
+                    : ParseConfig<T>(
+                        configuration.Raw,
+                        configuration.ConfigType);
         }
 
         /// <summary>
@@ -549,11 +651,15 @@
         /// Parses json into the specified object type.
         /// </summary>
         /// <typeparam name="T">The object type to return.</typeparam>
-        /// <param name="configRaw">The raw json.</param>
+        /// <param name="configRaw">The raw config contents.</param>
+        /// <param name="configType">The type of config file.</param>
         /// <returns>
         /// The contents of the raw json as the specified object type.
         /// </returns>
-        public static T ParseConfig<T>(string configRaw) where T : new()
+        public static T ParseConfig<T>(
+            string configRaw,
+            ConfigType configType = ConfigType.Json)
+            where T : new()
         {
             T config = default(T);
             if (configRaw == null)
@@ -563,12 +669,27 @@
                     Log(string.Format(
                     "ConfigManager Error: "
                     + "Cannot deserialize null string for Type {0}",
-                    typeof(T).ToString()));
+                    typeof(T).Name));
                 }
             }
             else if (configRaw != string.Empty)
             {
-                config = JsonSerializer.DeserializeFromString<T>(configRaw);
+                switch(configType)
+                {
+                    case ConfigType.Json:
+                        config = Newtonsoft
+                            .Json
+                            .JsonConvert
+                            .DeserializeObject<T>(configRaw);
+                        break;
+                    case ConfigType.Yaml:
+                        config = _yamlDeserializer.Deserialize<T>(
+                            new StringReader(configRaw));
+                        break;
+                    default:
+                        break;
+                }
+                
 
                 if (null == config && null != Log)
                 {
@@ -577,7 +698,7 @@
                         "ConfigManager Error: "
                         +@"Unable to deserialize string ""{0}"" to Type {1}",
                         configRaw,
-                        typeof(T).ToString()));
+                        typeof(T).Name));
                 }
             }
 

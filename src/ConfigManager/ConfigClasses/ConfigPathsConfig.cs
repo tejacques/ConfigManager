@@ -29,15 +29,13 @@
         {
             DirectoryInfo baseDirectory = new DirectoryInfo(
                 AppDomain.CurrentDomain.BaseDirectory);
-            while (baseDirectory.Name.ToLower().EndsWith("bin")
-                || baseDirectory.Name.ToLower().EndsWith("debug")
-                || baseDirectory.Name.ToLower().EndsWith("release"))
+            while (baseDirectory.Name.ToLowerInvariant().EndsWith("bin")
+                || baseDirectory.Name.ToLowerInvariant().EndsWith("debug")
+                || baseDirectory.Name.ToLowerInvariant().EndsWith("release"))
             {
                 baseDirectory = baseDirectory.Parent;
             }
-            DirectoryInfo cdir = new DirectoryInfo("C:/Configs");
-            DirectoryInfo ddir = new DirectoryInfo("D:/Configs");
-            Paths = new DirectoryInfo[] { baseDirectory, cdir, ddir };
+            Paths = new DirectoryInfo[] { baseDirectory };
         }
     }
 }
